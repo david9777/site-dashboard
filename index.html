@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>my sites</title>
+<style>
+  :root {
+    --link: #00159a;
+    --link-visited: #551a8b;
+    --ink: #222;
+    --muted: #888;
+    --rule: #ddd;
+    --up: #128a2b;
+    --down: #c0392b;
+    --bg: #fff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font: 14px/1.5 -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    margin: 0;
+    padding: 24px clamp(16px, 5vw, 64px) 64px;
+  }
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 10px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  h1 {
+    font-size: 26px;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .tagline { color: var(--muted); font-style: italic; }
+  .toolbar {
+    display: flex; align-items: center; gap: 14px;
+    margin: 14px 0 26px;
+  }
+  #search {
+    flex: 1 1 280px;
+    max-width: 360px;
+    padding: 7px 10px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  .meta { color: var(--muted); font-size: 12px; }
+  .meta a { color: var(--muted); }
+
+  .columns {
+    column-width: 320px;
+    column-gap: 40px;
+  }
+  .cat {
+    break-inside: avoid;
+    margin: 0 0 30px;
+    display: inline-block;
+    width: 100%;
+  }
+  .cat h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #b31217;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 5px;
+    margin: 0 0 10px;
+  }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { margin: 0 0 11px; }
+  .row { display: flex; align-items: baseline; gap: 7px; }
+  .dot {
+    flex: 0 0 auto;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #ccc;
+    margin-top: 6px;
+    transition: background .3s;
+  }
+  .dot.up   { background: var(--up); }
+  .dot.down { background: var(--down); }
+  a.site {
+    color: var(--link);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  a.site:visited { color: var(--link-visited); }
+  a.site:hover { text-decoration: underline; }
+  .blurb { color: #555; font-size: 12.5px; margin: 1px 0 0 15px; }
+  .url   { color: var(--muted); font-size: 11px; margin: 0 0 0 15px; word-break: break-all; }
+  .hidden { display: none; }
+  footer { margin-top: 30px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--rule); padding-top: 12px; }
+  code { background: #f4f4f4; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1 id="title">my sites</h1>
+    <span class="tagline" id="tagline"></span>
+  </header>
+
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="filter sites…" autocomplete="off">
+    <span class="meta" id="statusline">loading…</span>
+  </div>
+
+  <div class="columns" id="columns"></div>
+
+  <footer>
+    Edit <code>sites.json</code> to add, remove, or reorder sites — this page reads it live.
+    Green dot = reachable, red = down, grey = not checked yet.
+  </footer>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+
+function el(tag, cls, txt) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (txt != null) e.textContent = txt;
+  return e;
+}
+
+let STATUS = {};
+
+function render(config) {
+  document.title = config.title || "my sites";
+  $("#title").textContent = config.title || "my sites";
+  $("#tagline").textContent = config.tagline || "";
+
+  const cols = $("#columns");
+  cols.innerHTML = "";
+  let total = 0;
+
+  (config.categories || []).forEach(cat => {
+    const box = el("div", "cat");
+    box.appendChild(el("h2", null, cat.name));
+    const ul = el("ul");
+
+    (cat.sites || []).forEach(site => {
+      total++;
+      const li = el("li");
+      li.dataset.search = (site.name + " " + (site.blurb || "") + " " + site.url).toLowerCase();
+
+      const row = el("div", "row");
+      const dot = el("span", "dot");
+      dot.dataset.url = site.url;
+      row.appendChild(dot);
+
+      const a = el("a", "site", site.name);
+      a.href = site.url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      row.appendChild(a);
+      li.appendChild(row);
+
+      if (site.blurb) li.appendChild(el("div", "blurb", site.blurb));
+      li.appendChild(el("div", "url", site.url.replace(/^https?:\/\//, "")));
+
+      ul.appendChild(li);
+    });
+
+    box.appendChild(ul);
+    cols.appendChild(box);
+  });
+
+  applyStatus();
+  filter();
+  $("#statusline").textContent = total + " site" + (total === 1 ? "" : "s");
+}
+
+function applyStatus() {
+  document.querySelectorAll(".dot").forEach(dot => {
+    const s = STATUS[dot.dataset.url];
+    dot.classList.toggle("up", s === true);
+    dot.classList.toggle("down", s === false);
+    dot.title = s === true ? "reachable" : s === false ? "unreachable" : "not checked";
+  });
+}
+
+function filter() {
+  const q = $("#search").value.trim().toLowerCase();
+  document.querySelectorAll("#columns li").forEach(li => {
+    li.classList.toggle("hidden", q && !li.dataset.search.includes(q));
+  });
+  document.querySelectorAll(".cat").forEach(cat => {
+    const anyVisible = [...cat.querySelectorAll("li")].some(li => !li.classList.contains("hidden"));
+    cat.style.display = anyVisible ? "" : "none";
+  });
+}
+
+async function loadStatus() {
+  try {
+    const r = await fetch("/api/status", { cache: "no-store" });
+    if (!r.ok) return;
+    STATUS = await r.json();
+    applyStatus();
+  } catch (_) { /* status is best-effort */ }
+}
+
+async function boot() {
+  let config;
+  try {
+    const r = await fetch("sites.json", { cache: "no-store" });
+    config = await r.json();
+  } catch (e) {
+    $("#statusline").textContent = "could not load sites.json";
+    return;
+  }
+  render(config);
+  $("#search").addEventListener("input", filter);
+  loadStatus();
+  setInterval(loadStatus, 30000);
+}
+
+boot();
+</script>
+</body>
+</html>

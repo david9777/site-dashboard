@@ -1,0 +1,1 @@
+# No dependencies — the dashboard runs on the Python standard library only.

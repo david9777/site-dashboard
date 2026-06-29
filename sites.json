@@ -1,0 +1,51 @@
+{
+  "title": "my sites",
+  "tagline": "everything I've built, in one place",
+  "categories": [
+    {
+      "name": "legal tools",
+      "sites": [
+        {
+          "name": "CourtWatch",
+          "url": "https://court-watcher.replit.app/",
+          "blurb": "court docket / case monitoring"
+        },
+        {
+          "name": "SettlementSearch",
+          "url": "http://localhost:8765",
+          "blurb": "searchable class-action settlement database, auto-refreshed from FTC + federal courts"
+        },
+        {
+          "name": "Bellwether",
+          "url": "http://localhost:8770",
+          "blurb": "mass-arbitration target intelligence"
+        },
+        {
+          "name": "CaseBoard",
+          "url": "http://localhost:8780",
+          "blurb": "case tracker + office dashboard — owners, tasks, deadlines"
+        }
+      ]
+    },
+    {
+      "name": "data & monitoring",
+      "sites": [
+        {
+          "name": "BreachRadar",
+          "url": "http://localhost:8775",
+          "blurb": "data-breach monitoring"
+        }
+      ]
+    },
+    {
+      "name": "experiments",
+      "sites": [
+        {
+          "name": "Example Site",
+          "url": "https://example.com",
+          "blurb": "replace me — add your own sites by editing sites.json"
+        }
+      ]
+    }
+  ]
+}

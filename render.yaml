@@ -1,0 +1,13 @@
+# One-click deploy on Render (https://render.com): New → Blueprint → connect
+# the repo containing this file. Free plan is fine — the dashboard keeps no
+# state, it just serves a page and pings your sites.
+services:
+  - type: web
+    name: dashboard
+    runtime: python
+    plan: free
+    buildCommand: ""              # pure standard library, nothing to install
+    startCommand: "python server.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
