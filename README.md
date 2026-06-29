@@ -41,12 +41,32 @@ needed. Shape:
 Use public deployed URLs (e.g. `https://settlesearch.onrender.com`) or local
 ports — mix freely.
 
+## Hosting
+
+The dashboard is **pure static** — `index.html` + `sites.json` are all you need
+to serve. Host it anywhere with no backend:
+
+- **GitHub Pages** — push this repo, enable Pages → always-on, free, stable URL.
+- **Netlify Drop** (app.netlify.com/drop) — drag the folder, instant HTTPS link.
+- **Cloudflare Pages**, S3, etc.
+
+Static hosts are always-on (no cold starts), which makes them ideal for an
+emailed link or a wall/kiosk display. `server.py` is still handy for running
+locally (`python server.py`).
+
 ## How status works
 
-`server.py` pings each `url` from the server side (avoids browser CORS),
-caches the result for ~25s, and the page polls `/api/status` every 30s.
-Any HTTP response counts as "up" (green); connection refused / timeout is
-"down" (red); grey means not checked yet.
+Two modes, automatic:
+
+- **With `server.py`** (local): the server pings each `url` server-side,
+  caches ~25s, and the page polls `/api/status`.
+- **Static host** (no backend): the browser pings each `url` directly. Any
+  response = up (green), network failure/timeout = down (red), grey = not
+  checked yet.
+
+Browser-side checks only work for **public URLs** — `localhost` entries will
+read as down for anyone off your machine, so use public URLs for a published
+dashboard.
 
 ## Files
 
