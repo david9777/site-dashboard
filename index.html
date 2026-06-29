@@ -100,9 +100,45 @@
   .hidden { display: none; }
   footer { margin-top: 30px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--rule); padding-top: 12px; }
   code { background: #f4f4f4; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+
+  /* password gate */
+  #gate {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #gate form {
+    width: min(320px, 86vw);
+    text-align: center;
+  }
+  #gate h1 { font-size: 22px; margin: 0 0 4px; }
+  #gate p  { color: var(--muted); margin: 0 0 18px; font-size: 13px; }
+  #gate input {
+    width: 100%; padding: 10px 12px; font-size: 15px;
+    border: 1px solid #bbb; border-radius: 5px;
+  }
+  #gate button {
+    margin-top: 10px; width: 100%; padding: 10px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    color: #fff; background: var(--link); border: 0; border-radius: 5px;
+  }
+  #gate .err { color: var(--down); font-size: 12px; min-height: 16px; margin-top: 8px; }
+  body.locked { overflow: hidden; }
+  #app.hidden { display: none; }
 </style>
 </head>
-<body>
+<body class="locked">
+  <div id="gate">
+    <form id="gateForm" autocomplete="off">
+      <h1>my sites</h1>
+      <p>enter the password to continue</p>
+      <input id="gatePass" type="password" placeholder="password" autocomplete="off" autofocus>
+      <button type="submit">unlock</button>
+      <div class="err" id="gateErr"></div>
+    </form>
+  </div>
+
+  <div id="app" class="hidden">
   <header>
     <h1 id="title">my sites</h1>
     <span class="tagline" id="tagline"></span>
@@ -119,6 +155,7 @@
     Edit <code>sites.json</code> to add, remove, or reorder sites — this page reads it live.
     Green dot = reachable, red = down, grey = not checked yet.
   </footer>
+  </div><!-- /#app -->
 
 <script>
 const $ = (s, el = document) => el.querySelector(s);
@@ -247,7 +284,51 @@ async function boot() {
   setInterval(loadStatus, 30000);
 }
 
-boot();
+// ---------------------------------------------------------------------------
+// Password gate (client-side). NOTE: this only hides the page from casual
+// viewers — it is NOT real security. The password is stored as a SHA-256 hash
+// (so it's not in plain sight), but a determined person can still read the
+// page source or fetch sites.json directly. For real protection, put auth in
+// front of the host (e.g. Cloudflare Access) or on the apps themselves.
+//
+// To change the password: generate a new hash and paste it below. In the
+// browser console run:
+//   crypto.subtle.digest("SHA-256", new TextEncoder().encode("YOUR_PASSWORD"))
+//     .then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")))
+const PASS_HASH = "b2e8f9cf55af20460c367b830741bfd67f8151c8bc4b0dda4c79db1331c3f635";
+const UNLOCK_KEY = "dash_unlocked";
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2, "0")).join("");
+}
+
+function unlock() {
+  document.body.classList.remove("locked");
+  $("#gate").style.display = "none";
+  $("#app").classList.remove("hidden");
+  boot();
+}
+
+function initGate() {
+  if (sessionStorage.getItem(UNLOCK_KEY) === PASS_HASH) { unlock(); return; }
+  const form = $("#gateForm");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const val = $("#gatePass").value;
+    const h = await sha256(val);
+    if (h === PASS_HASH) {
+      sessionStorage.setItem(UNLOCK_KEY, PASS_HASH);
+      unlock();
+    } else {
+      $("#gateErr").textContent = "wrong password";
+      $("#gatePass").value = "";
+      $("#gatePass").focus();
+    }
+  });
+}
+
+initGate();
 </script>
 </body>
 </html>
