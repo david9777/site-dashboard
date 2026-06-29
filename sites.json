@@ -6,6 +6,11 @@
       "name": "legal tools",
       "sites": [
         {
+          "name": "LK Article Engine",
+          "url": "https://legal-article-engine--dovidysamson.replit.app/",
+          "blurb": "legal article / content generation"
+        },
+        {
           "name": "CourtWatch",
           "url": "https://court-watcher.replit.app/",
           "blurb": "court docket / case monitoring"
