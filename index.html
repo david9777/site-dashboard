@@ -198,13 +198,38 @@ function filter() {
   });
 }
 
+// Browser-side reachability ping (used when there's no Python backend, e.g.
+// on a static host). A no-cors GET resolves for any server response and
+// rejects on a network failure/timeout — a good-enough "is it alive" signal.
+async function pingClient(url) {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 6000);
+    await fetch(url, { mode: "no-cors", cache: "no-store", signal: ctrl.signal });
+    clearTimeout(t);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 async function loadStatus() {
+  // Prefer the server-side check (accurate) when running under server.py…
   try {
     const r = await fetch("/api/status", { cache: "no-store" });
-    if (!r.ok) return;
-    STATUS = await r.json();
-    applyStatus();
-  } catch (_) { /* status is best-effort */ }
+    if (r.ok) {
+      STATUS = await r.json();
+      applyStatus();
+      return;
+    }
+  } catch (_) { /* no backend — fall through to client-side pings */ }
+
+  // …otherwise (static hosting) ping each site straight from the browser.
+  const dots = [...document.querySelectorAll(".dot")];
+  await Promise.all(dots.map(async d => {
+    STATUS[d.dataset.url] = await pingClient(d.dataset.url);
+  }));
+  applyStatus();
 }
 
 async function boot() {
