@@ -12,7 +12,7 @@
         },
         {
           "name": "SettlementSearch",
-          "url": "http://localhost:8765",
+          "url": "https://david9777.github.io/SettlementSearch/",
           "blurb": "searchable class-action settlement database, auto-refreshed from FTC + federal courts"
         },
         {
