@@ -17,12 +17,12 @@
         },
         {
           "name": "Bellwether",
-          "url": "http://localhost:8770",
+          "url": "https://bellwether-pdoa.onrender.com/",
           "blurb": "mass-arbitration target intelligence"
         },
         {
           "name": "CaseBoard",
-          "url": "http://localhost:8780",
+          "url": "https://caseboard.onrender.com/",
           "blurb": "case tracker + office dashboard — owners, tasks, deadlines"
         }
       ]
@@ -32,18 +32,8 @@
       "sites": [
         {
           "name": "BreachRadar",
-          "url": "http://localhost:8775",
-          "blurb": "data-breach monitoring"
-        }
-      ]
-    },
-    {
-      "name": "experiments",
-      "sites": [
-        {
-          "name": "Example Site",
-          "url": "https://example.com",
-          "blurb": "replace me — add your own sites by editing sites.json"
+          "url": "https://breachradar-wl84.onrender.com/",
+          "blurb": "SEC cybersecurity breach filings monitor"
         }
       ]
     }
