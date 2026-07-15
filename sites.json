@@ -6,6 +6,11 @@
       "name": "legal tools",
       "sites": [
         {
+          "name": "Case Pipeline",
+          "url": "https://case-pipeline.onrender.com/board",
+          "blurb": "case pipeline board (has its own login)"
+        },
+        {
           "name": "LK Article Engine",
           "url": "https://legal-article-engine--dovidysamson.replit.app/",
           "blurb": "legal article / content generation"
