@@ -6,6 +6,11 @@
       "name": "legal tools",
       "sites": [
         {
+          "name": "Dibs",
+          "url": "https://dibs-y9ur.onrender.com/",
+          "blurb": "claim-it-first case desk board"
+        },
+        {
           "name": "Case Pipeline",
           "url": "https://case-pipeline.onrender.com/board",
           "blurb": "case pipeline board (has its own login)"
